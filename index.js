@@ -14,15 +14,34 @@ const reset = "\x1b[0m";
 banner();
 loader(bot);
 
-
 bot.on('message', async (msg) => {
     const text = msg.text || "";
+    const lowerText = text.toLowerCase().trim();
+
     if (text.startsWith("http") && !text.startsWith(config.prefix)) {
         try {
             const alldown = require("./UCA-BOT/Cmd/alldown");
             await alldown.run(bot, msg, [text]);
         } catch (err) {
             console.error("Auto-DL Error:", err.message);
+        }
+    }
+
+    const triggers = ["bot", "বট", "baby"];
+    const isTrigger = triggers.some(t => lowerText.startsWith(t));
+
+    if (isTrigger && !text.startsWith(config.prefix)) {
+        try {
+            const botCmd = require("./UCA-BOT/Cmd/bot");
+            let cleanText = text;
+            triggers.forEach(t => {
+                if (lowerText.startsWith(t)) cleanText = text.substring(t.length).trim();
+            });
+            
+            const args = cleanText ? cleanText.split(" ") : [];
+            await botCmd.run(bot, msg, args);
+        } catch (err) {
+            console.error("Auto-Bot Error:", err.message);
         }
     }
 });
