@@ -73,7 +73,7 @@ module.exports = {
             return bot.sendMessage(chatId, `✅ Successfully removed **${name}** (ID: ${targetId}) from Admin list.`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
 
         } else if (action === "list" || !action) {
-            let adminListMsg = "╭━━━━━━❰ 👑 BOT ADMINS ❱━━━━━━╮\n";
+            let adminListMsg = "╭━━━❰ 👑 BOT ADMINS ❱━━━╮\n";
             for (let i = 0; i < config.admins.length; i++) {
                 const id = config.admins[i];
                 const name = await getUserInfo(bot, chatId, id); 
