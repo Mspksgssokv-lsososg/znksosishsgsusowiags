@@ -4,11 +4,12 @@ const config = require("../../UCA-Config/config");
 module.exports = {
   name: "ai",
   credits: "RAKIB MAHMUD",
-  description: "Dynamic AI System",
+  description: "Chat with GPT AI using Nayan API",
   
   run: async (bot, msg, args) => {
     const chatId = msg.chat.id;
     const messageId = msg.message_id;
+    
     let text = args.join(" ").trim();
 
     if (!text && msg.reply_to_message && msg.reply_to_message.text) {
@@ -16,24 +17,25 @@ module.exports = {
     }
 
     if (!text) {
-        return bot.sendMessage(chatId, `❌ Provide a question!\nExample: ${config.prefix}ai hello`, { reply_to_message_id: messageId });
+        return bot.sendMessage(chatId, `❌ Please provide a message!\nUsage: ${config.prefix}ai <question>`, { reply_to_message_id: messageId });
     }
 
-    const waiting = await bot.sendMessage(chatId, "🔍 AI is thinking...", { reply_to_message_id: messageId });
+    const waiting = await bot.sendMessage(chatId, "💬 AI is preparing the answer...", { reply_to_message_id: messageId });
 
     try {
-      const apiSource = await axios.get(`https://raw.githubusercontent.com/MOHAMMAD-NAYAN-07/Nayan/refs/heads/main/api.json`);
-      const apiData = apiSource.data;
+      // Fetching Dynamic API
+      const apiConfig = await axios.get(`https://raw.githubusercontent.com/MOHAMMAD-NAYAN-07/Nayan/refs/heads/main/api.json`);
+      const apis = apiConfig.data;
+
+      let baseUrl = apis.gpt4 || apis.api;
+      let endpoint = apis.gpt4 ? "gpt4" : "nayan/gpt3";
       
-      const baseUrl = apiData.gpt4 || apiData.api;
-      const apiUrl = `${baseUrl}/gpt4?text=${encodeURIComponent(text)}`;
+      const response = await axios.get(`${baseUrl}/${endpoint}?text=${encodeURIComponent(text)}`);
+      const responseText = response.data.response || response.data.result || "No response received.";
 
-      const res = await axios.get(apiUrl);
-      const responseText = res.data.response || res.data.result || "No response received.";
+      const aiResponse = `🤖 **AI Response:**\n━━━━━━━━━━━━━━━━━━\n${responseText}\n━━━━━━━━━━━━━━━━━━\n👤 **User:** ${msg.from.first_name}`;
 
-      const finalMsg = `🤖 **AI Response:**\n━━━━━━━━━━━━━━━━━━\n${responseText}\n━━━━━━━━━━━━━━━━━━\n👤 **User:** ${msg.from.first_name}`;
-
-      await bot.editMessageText(finalMsg, {
+      await bot.editMessageText(aiResponse, {
         chat_id: chatId,
         message_id: waiting.message_id,
         parse_mode: "Markdown"
