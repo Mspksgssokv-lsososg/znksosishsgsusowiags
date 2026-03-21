@@ -2,12 +2,11 @@ const config = require("../UCA-Config/config");
 const noPrefix = require("../package.json");
 
 module.exports = async (bot, msg) => {
-  if (!msg.text) return;
+  if (!msg || !msg.text) return;
 
   const text = msg.text.toLowerCase();
 
-  // No prefix system
-  if (noPrefix.noprefix.includes(text)) {
+  if (noPrefix && Array.isArray(noPrefix.noprefix) && noPrefix.noprefix.includes(text)) {
     return bot.sendMessage(msg.chat.id, "👋 Hello there!");
   }
 
@@ -21,8 +20,8 @@ module.exports = async (bot, msg) => {
   if (!command) return;
 
   try {
-    command.run(bot, msg, args);
+    await command.run(bot, msg, args);
   } catch (err) {
-    console.log(err);
+    console.error("Command Error:", err);
   }
 };
