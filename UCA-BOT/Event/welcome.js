@@ -1,7 +1,9 @@
 module.exports = {
-    name: "welcome",
-    credits: "RAKIB MAHMUD",
-    description: "Welcome new members",
+    config: {
+        name: "welcome",
+        author: "RAKIB MAHMUD",
+        description: "নতুন মেম্বার জয়েন করলে স্বাগতম জানাবে"
+    },
 
     run: async (bot, msg) => {
         try {
@@ -11,18 +13,18 @@ module.exports = {
 
             if (!newMembers || newMembers.length === 0) return;
 
-            for (const user of newMembers) {
-                // চেক করা হচ্ছে বট নিজে জয়েন করেছে কি না
+            for (const user of newMembers) {                
                 const me = await bot.getMe();
                 if (user.id === me.id) continue;
 
                 const name = user.first_name || "বন্ধু";
                 
-                const welcomeMsg = `✨ **স্বাগতম, ${name}!** ✨\n` +
+                const welcomeMsg = `✨ **স্বাগতম, [${name}](tg://user?id=${user.id})!** ✨\n` +
                                    `━━━━━━━━━━━━━━━━━\n` +
                                    `আমাদের **${groupName}** গ্রুপে আপনাকে জানাই ভালোবাসা। ❤️\n\n` +
                                    `আশা করি আপনার সময়টি এখানে ভালো কাটবে! 🤝\n` +
-                                   `━━━━━━━━━━━━━━━━━`;
+                                   `━━━━━━━━━━━━━━━━━\n` +
+                                   `✅ **UCA RAKIB BOT**`;
 
                 await bot.sendMessage(chatId, welcomeMsg, { 
                     parse_mode: 'Markdown' 
