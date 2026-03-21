@@ -9,9 +9,7 @@ module.exports = {
   run: async (bot, msg, args) => {
     const chatId = msg.chat.id;
     const messageId = msg.message_id;
-    
-    // index.js থেকে আসা লিংক চেক করা
-    const link = Array.isArray(args) ? args[0] : (typeof args === 'string' ? args : msg.text);
+    const link = typeof args === 'string' ? args : args[0];
 
     if (!link || !link.startsWith("http")) return;
 
@@ -22,34 +20,22 @@ module.exports = {
 
     try {
       const res = await alldown(link);
-      if (!res || !res.data || !res.data.high) throw new Error("Link not found");
-
       const { high, title } = res.data;
       const videoTitle = title || "No Title Found";
 
       const vidResponse = await axios.get(high, { responseType: 'stream' });
 
-      // বাটন সেটআপ: এখানে copy_text ব্যবহার করা হয়েছে
+      // বাটন সেটআপ
       const replyMarkup = {
         inline_keyboard: [
-          [
-            { 
-              text: '📥 Copy Title', 
-              copy_text: { text: videoTitle } // এই বাটনে ক্লিক করলে টাইটেল কপি হবে
-            }
-          ],
-          [
-            { 
-              text: '🔗 JOIN OWNER', 
-              url: 'https://t.me/SYSTEM_ERROR_KING' // আপনার টেলিগ্রাম ইউজারনেম দিন
-            }
-          ]
+          [{ text: '🔗 𝐉𝐎𝐈𝐍 𝐎𝐖𝐍𝐄𝐑', url: 'https://t.me/SYSTEM_ERROR_KING' }] 
         ]
       };
 
-      const caption = `🎬 **Video Title:**\n\`${videoTitle}\`\n\n✅ **Downloaded by UCA-Bot**`;
+      // টাইটেল কপি করার জন্য `ব্যবহার করা হয়েছে
+      const caption = `🎬 **Video Title:**\n\`${videoTitle}\`\n\n*(যে কোন সমস্যাই এডমিনেশন যোগাযোগ করুন )*\n\n✅ **Downloaded by UCA-Bot**`;
 
-      await bot.deleteMessage(chat_id, waitMsg.message_id).catch(() => {});
+      await bot.deleteMessage(chatId, waitMsg.message_id);
 
       await bot.sendVideo(chatId, vidResponse.data, {
         caption: caption,
@@ -59,7 +45,7 @@ module.exports = {
       });
 
     } catch (error) {
-      await bot.editMessageText(`❌ **Error:** ${error.message}`, {
+      await bot.editMessageText(`❌ **Error:** ${error.message || "Failed to download."}`, {
         chat_id: chatId,
         message_id: waitMsg.message_id
       });
