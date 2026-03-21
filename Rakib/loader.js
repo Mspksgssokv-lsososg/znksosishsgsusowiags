@@ -1,33 +1,44 @@
-// কালার ভ্যারিয়েবল (পরিবর্তন না করার জন্য)
-const c = "\x1b[36m"; // Cyan
-const g = "\x1b[32m"; // Green
-const y = "\x1b[33m"; // Yellow
-const w = "\x1b[37m"; // White
-const b = "\x1b[1m";  // Bold
-const r = "\x1b[0m";  // Reset
+const fs = require("fs");
+const path = require("path");
 
-// আপনার দেওয়া স্ক্রিনশট অনুযায়ী সিরিয়াল
-console.log(`${c}data - bot name : ${b}RAKIB-BOT___//007 🤖${r}`);
-console.log(`${c}data - bot id : 100078516758286${r}`);
-console.log(`${c}data - bot prefix : /${r}`);
-console.log(`${c}data - deployed 2 bot operators and 2 admins${r}`);
+module.exports = (bot) => {
+  bot.commands = new Map();
 
-console.log(`${g}event - successfully deployed joinnoti${r}`);
-console.log(`${g}event - successfully deployed leave${r}`);
-console.log(`${g}event - successfully deployed logs${r}`);
-console.log(`${g}event - successfully deployed update${r}`);
-console.log(`${c}data - deployed 1 groups and 3 users${r}`);
+  // কালার কোড
+  const g = "\x1b[32m"; // Green
+  const c = "\x1b[36m"; // Cyan
+  const y = "\x1b[33m"; // Yellow
+  const r = "\x1b[0m";  // Reset
 
-console.log(`${y}_________________________________________________${r}\n`);
+  console.log(`${y}--- Loading System Files ---${r}`);
 
-// ASCII Art (RAKIB BOT)
-console.log(`${b}${c}╦═╗╔═╗╦╔═╦╔╗  ╔╗ ╔═╗╔╦╗`);
-console.log(`${b}${c}╠╦╝╠═╣╠╩╗║╠╩╗ ╠╩╗║ ║ ║ `);
-console.log(`${b}${c}╩╚═╩ ╩╩ ╩╩╚═╝ ╚═╝╚═╝ ╩ ${r}\n`);
+  // Commands load
+  const cmdPath = path.join(__dirname, "../UCA-BOT/Cmd");
+  const cmdFiles = fs.readdirSync(cmdPath).filter(f => f.endsWith(".js"));
 
-console.log(`${y}_________________________________________________${r}\n`);
+  for (const file of cmdFiles) {
+    try {
+      const cmd = require(`${cmdPath}/${file}`);
+      bot.commands.set(cmd.name, cmd);
+      console.log(`${g}✅ Command Loaded: ${file}${r}`);
+    } catch (err) {
+      console.log(`${y}❌ Error in: ${file}${r}`);
+    }
+  }
 
-console.log(`${b}OWNNER    :${r} Rakib Chowdhury`);
-console.log(`${b}Facebook  :${r} https://www.facebook.com/SYSTEM.ERROR.KING`);
-console.log(`${b}Whatsapp  :${r} wa.me/+8801771306867`);
-console.log(`${b}MSG Enjoy Rakib Bot👍${r}`);
+  // Events load
+  const eventPath = path.join(__dirname, "../UCA-BOT/Event");
+  const eventFiles = fs.readdirSync(eventPath).filter(f => f.endsWith(".js"));
+
+  for (const file of eventFiles) {
+    try {
+      const event = require(`${eventPath}/${file}`);
+      event(bot);
+      console.log(`${c}🔔 Event Loaded: ${file}${r}`);
+    } catch (err) {
+      console.log(`${y}❌ Error in: ${file}${r}`);
+    }
+  }
+
+  console.log(`${y}--- Loading Complete ---${r}\n`);
+};
