@@ -13,7 +13,6 @@ module.exports = {
     
     const inputText = args.join(" ").trim();
     
-    // লিঙ্ক না দিলে এরর দেখাবে
     if (!inputText || !inputText.startsWith("http")) {
       return bot.sendMessage(
         chatId,
@@ -22,7 +21,6 @@ module.exports = {
       );
     }
 
-    // ডাউনলোডিং মেসেজ
     const waitMsg = await bot.sendMessage(
         chatId,
         "⏳ Downloading Please Wait...!",
@@ -32,40 +30,29 @@ module.exports = {
     try {
       const res = await alldown(inputText);
       
-      // ভিডিওর ডাটা চেক করা
       if (!res || !res.data || !res.data.high) {
-        throw new Error("Could not find video link.");
+        throw new Error("Video link not found!");
       }
 
       const { high, title } = res.data;
 
-      // ভিডিও স্ট্রিম করা
       const vidResponse = await axios.get(high, { responseType: 'stream' });
       const videoStream = vidResponse.data;
 
       const caption = `🎬 **Title:** ${title || "No Title"}`;
 
-      const replyMarkup = {
-        inline_keyboard: [
-          [{ text: '🔗 𝐁𝐎𝐓 𝐎𝐖𝐍𝐄𝐑', url: 'https://t.me/UCA_RAKIB }], // এখানে আপনার ইউজারনেম দিন
-        ],
-      };
-
-      // ওয়েটিং মেসেজ ডিলিট করে ভিডিও পাঠানো
       await bot.deleteMessage(chatId, waitMsg.message_id);
 
       await bot.sendVideo(chatId, videoStream, {
         caption: caption,
         parse_mode: 'Markdown',
-        reply_to_message_id: messageId,
-        reply_markup: replyMarkup
+        reply_to_message_id: messageId
       });
 
     } catch (error) {
-      console.error('❌ Error:', error.message);
-      
+      console.error('Error:', error.message);
       await bot.editMessageText(
-        '❌ Failed to download. Please verify the link or try again later.',
+        `❌ Error: ${error.message || "Failed to download."}`,
         {
           chat_id: chatId,
           message_id: waitMsg.message_id
