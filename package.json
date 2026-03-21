@@ -1,19 +1,16 @@
 {
-  "name": "rakib-bot",
+  "name": "uca-rakib-bot",
   "version": "1.0.0",
-  "description": "Telegram Bot by Rakib",
+  "description": "Telegram Bot by RAKIB MAHMUD",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node index.js"
   },
-  "author": "Rakib",
-  "license": "MIT",
+  "author": "RAKIB MAHMUD",
+  "license": "ISC",
   "dependencies": {
     "axios": "^1.6.0",
-    "node-telegram-bot-api": "^0.64.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.0"
+    "node-telegram-bot-api": "^0.64.0",
+    "nayan-media-downloaders": "^3.1.0"
   }
 }
