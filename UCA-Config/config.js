@@ -1,5 +1,5 @@
 module.exports = {
-  token: "YOUR_BOT_TOKEN",
+  token: "7387717029:AAF_HQ6rOXxjT0VSyANiwqoWYREXuaO03C0",
   prefix: "/",
-  admins: [123456789] // তোমার Telegram ID
+  admins: [8378935950] 
 };
