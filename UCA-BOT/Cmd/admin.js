@@ -34,7 +34,7 @@ module.exports = {
         }
 
         if (senderId !== botOwnerId) {
-             return bot.sendMessage(chatId, `❌ Permission denied. Only the Bot Owner (${botOwnerId}) can use this command.`, { reply_to_message_id: messageId });
+             return bot.sendMessage(chatId, `❌ **Access Denied!**\nOnly the Bot Owner can control this.`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
         }
 
         const action = args[0]?.toLowerCase();
@@ -46,44 +46,44 @@ module.exports = {
             } else if (args[1] && !isNaN(args[1])) {
                 targetId = parseInt(args[1]);
             } else {
-                return bot.sendMessage(chatId, `⚠️ Usage: ${prefix}admin ${action} [user_id] or reply to a message.`, { reply_to_message_id: messageId });
+                return bot.sendMessage(chatId, `⚠️ **Usage Guide:**\n» \`${prefix}admin add\` (reply to user)\n» \`${prefix}admin remove\` (reply to user)\n» \`${prefix}admin list\``, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
             }
         }
         
         if (action === "add") {
             if (config.admins.includes(targetId)) {
-                return bot.sendMessage(chatId, `⚠️ User (ID: ${targetId}) is already a Bot Admin.`, { reply_to_message_id: messageId });
+                return bot.sendMessage(chatId, `⚠️ **Already Authorized!**\nThis user is already in the Admin list.`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
             }
             config.admins.push(targetId);
             await updateConfigFile();
             const name = await getUserInfo(bot, chatId, targetId);
-            return bot.sendMessage(chatId, `✅ Successfully added **${name}** (ID: ${targetId}) as a Bot Admin.`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
+            return bot.sendMessage(chatId, `✅ **Admin Added Successfully!**\n━━━━━━━━━━━━━━━━━━\n👤 **Name:** ${name}\n🆔 **ID:** \`${targetId}\`\n━━━━━━━━━━━━━━━━━━`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
             
         } else if (action === "remove") {
             if (targetId === botOwnerId) {
-                return bot.sendMessage(chatId, `❌ You cannot remove the Bot Owner.`, { reply_to_message_id: messageId });
+                return bot.sendMessage(chatId, `❌ **Action Blocked!**\nYou cannot remove the Main Owner.`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
             }
             const index = config.admins.indexOf(targetId);
             if (index === -1) {
-                return bot.sendMessage(chatId, `⚠️ User is not a Bot Admin.`, { reply_to_message_id: messageId });
+                return bot.sendMessage(chatId, `⚠️ **Not Found!**\nThis user is not an Admin.`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
             }
             config.admins.splice(index, 1);
             await updateConfigFile();
             const name = await getUserInfo(bot, chatId, targetId);
-            return bot.sendMessage(chatId, `✅ Successfully removed **${name}** (ID: ${targetId}) from Admin list.`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
+            return bot.sendMessage(chatId, `🗑️ **Admin Removed!**\n━━━━━━━━━━━━━━━━━━\n👤 **Name:** ${name}\n🆔 **ID:** \`${targetId}\`\n━━━━━━━━━━━━━━━━━━`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
 
         } else if (action === "list" || !action) {
-            let adminListMsg = "╭━━━❰ 👑 BOT ADMINS ❱━━━╮\n";
+            let adminListMsg = "╭━━━━━━❰ 👑 **BOT ADMINS** ❱━━━━━━╮\n";
             for (let i = 0; i < config.admins.length; i++) {
                 const id = config.admins[i];
                 const name = await getUserInfo(bot, chatId, id); 
-                adminListMsg += `│ ${i + 1}. ${name} (ID: ${id}) ${i === 0 ? "⭐" : ""}\n`;
+                adminListMsg += `│ ${i + 1}. ${name}\n│    └─ 🆔 \`${id}\` ${i === 0 ? "👑" : "🛠️"}\n`;
             }
-            adminListMsg += "╰━━━━━━━━━━━━━━━━━━━━━━❍";
-            return bot.sendMessage(chatId, adminListMsg, { reply_to_message_id: messageId });
+            adminListMsg += "╰━━━━━━━━━━━━━━━━━━━━━━━━━━━❍";
+            return bot.sendMessage(chatId, adminListMsg, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
 
         } else {
-            return bot.sendMessage(chatId, `⚠️ Invalid action. Use add, remove or list.`, { reply_to_message_id: messageId });
+            return bot.sendMessage(chatId, `⚠️ **Invalid Action!**\nUse \`add\`, \`remove\` or \`list\`.`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
         }
     }
 };
