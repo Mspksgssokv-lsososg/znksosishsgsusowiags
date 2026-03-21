@@ -1,37 +1,35 @@
 module.exports = {
     name: "welcome",
     credits: "RAKIB MAHMUD",
-    description: "নতুন মেম্বার জয়েন করলে স্বাগতম জানাবে",
+    description: "Welcome new members",
 
     run: async (bot, msg) => {
-        const chatId = msg.chat.id;
-        const groupName = msg.chat.title || "আমাদের গ্রুপ";
-        const newMembers = msg.new_chat_members;
-        
-        if (!newMembers) return;
+        try {
+            const chatId = msg.chat.id;
+            const groupName = msg.chat.title || "আমাদের গ্রুপ";
+            const newMembers = msg.new_chat_members;
 
-        for (const user of newMembers) {            
-            const me = await bot.getMe();
-            if (user.id === me.id) continue;
+            if (!newMembers || newMembers.length === 0) return;
 
-            const name = user.first_name;
-            const userId = user.id;
-            
-            const welcomeMsg = `✨ **স্বাগতম, [${name}](tg://user?id=${userId})!** ✨\n` +
-                               `━━━━━━━━━━━━━━━━━\n` +
-                               `আমাদের **${groupName}** গ্রুপে আপনাকে জানাই উষ্ণ অভ্যর্থনা ও ভালোবাসা। ❤️\n\n` +
-                               `আশা করি আমাদের সাথে আপনার সময়টি অনেক আনন্দদায়ক হবে! 🤝\n` +
-                               `━━━━━━━━━━━━━━━━━\n` +
-                               `✅ **Downloaded by UCA-Bot**`;
+            for (const user of newMembers) {
+                // চেক করা হচ্ছে বট নিজে জয়েন করেছে কি না
+                const me = await bot.getMe();
+                if (user.id === me.id) continue;
 
-            try {
+                const name = user.first_name || "বন্ধু";
+                
+                const welcomeMsg = `✨ **স্বাগতম, ${name}!** ✨\n` +
+                                   `━━━━━━━━━━━━━━━━━\n` +
+                                   `আমাদের **${groupName}** গ্রুপে আপনাকে জানাই ভালোবাসা। ❤️\n\n` +
+                                   `আশা করি আপনার সময়টি এখানে ভালো কাটবে! 🤝\n` +
+                                   `━━━━━━━━━━━━━━━━━`;
+
                 await bot.sendMessage(chatId, welcomeMsg, { 
-                    parse_mode: 'Markdown',
-                    disable_web_page_preview: true 
+                    parse_mode: 'Markdown' 
                 });
-            } catch (e) {
-                console.error("Welcome Send Error:", e.message);
             }
+        } catch (err) {
+            console.error("Welcome Script Error:", err.message);
         }
     }
 };
