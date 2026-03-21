@@ -4,10 +4,10 @@ const config = require("../../UCA-Config/config");
 module.exports = {
   name: "ai",
   credits: "RAKIB MAHMUD",
-  description: "Chat with AI using GPT API",
+  description: "Chat with GPT-4 AI",
   
   run: async (bot, msg, args) => {
-    const chatId = msg.chat.id; // এখানে নাম chatId
+    const chatId = msg.chat.id;
     const messageId = msg.message_id;
     
     let text = args.join(" ").trim();
@@ -23,23 +23,38 @@ module.exports = {
     const waiting = await bot.sendMessage(chatId, "🔍 AI is thinking...", { reply_to_message_id: messageId });
 
     try {
-      const res = await axios.get(`https://smyt-api.onrender.com/gpt?prompt=${encodeURIComponent(text)}`);
-      const responseText = res.data.data || "I couldn't get a response from AI.";
+      // New Working API Link (GPT-4)
+      const res = await axios.get(`https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(text)}&owner=Rakib&botname=UCA-Bot`);
+      
+      // Popcat API returns response in 'response' field
+      const responseText = res.data.response || "I'm sorry, I couldn't process that.";
 
       const finalMsg = `🤖 **AI Response:**\n━━━━━━━━━━━━━━━━━━\n${responseText}\n━━━━━━━━━━━━━━━━━━\n👤 **User:** ${msg.from.first_name}`;
 
-      // এখানে chat_id এর বদলে chatId ব্যবহার করতে হবে
       await bot.editMessageText(finalMsg, {
-        chat_id: chatId, 
+        chat_id: chatId,
         message_id: waiting.message_id,
         parse_mode: "Markdown"
       });
 
     } catch (err) {
-      bot.editMessageText(`❌ API Error: ${err.message}`, {
-        chat_id: chatId,
-        message_id: waiting.message_id
-      });
+      // If error occurs, try a backup API
+      try {
+          const backupRes = await axios.get(`https://api.simsimi.vn/v1/simtalk`, {
+              params: { text: text, lc: "en" }
+          });
+          const backupText = backupRes.data.message;
+          
+          await bot.editMessageText(`🤖 **AI (Backup):**\n\n${backupText}`, {
+            chat_id: chatId,
+            message_id: waiting.message_id
+          });
+      } catch (backupErr) {
+          bot.editMessageText(`❌ All AI APIs are currently down. Please try again later.`, {
+            chat_id: chatId,
+            message_id: waiting.message_id
+          });
+      }
     }
   }
 };
