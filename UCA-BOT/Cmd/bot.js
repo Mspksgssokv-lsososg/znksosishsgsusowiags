@@ -10,7 +10,6 @@ module.exports = {
         const messageId = msg.message_id;
         const usermsg = args.join(" ").trim();
 
-        // ১. যদি শুধু /bot লেখে, তবে র‍্যান্ডম জোকস/রিপ্লাই দিবে
         if (!usermsg) {
             const greetings = [
                 "বেশি bot bot করলে চুম্মা দিয়া তোমার কিডনি ব্লক করে দেবো😒",
@@ -30,15 +29,12 @@ module.exports = {
             });
         }
 
-        // ২. যদি কিছু লিখে প্রশ্ন করে তবে AI উত্তর দিবে
         try {
             await bot.sendChatAction(chatId, 'typing');
 
-            // আপনার দেওয়া সিস্টেম অনুযায়ী এপিআই কল
             const base = await axios.get("https://raw.githubusercontent.com/MOHAMMAD-NAYAN-07/Nayan/main/api.json");
             const apiUrl = base.data.sim; 
             
-            // এই সেই এপিআই লিঙ্ক
             const response = await axios.get(`${apiUrl}/sim?type=ask&ask=${encodeURIComponent(usermsg)}&status=true`);
             
             const replyText = response.data.data?.msg || "🤖 সরি জান, উত্তর দিতে পারছি না।";
@@ -49,7 +45,6 @@ module.exports = {
 
         } catch (err) {
             console.error("API Error:", err.message);
-            // ব্যাকআপ এপিআই যদি ওপরেরটা কাজ না করে
             try {
                 const backup = await axios.get(`https://api.simsimi.vn/v1/simtalk`, {
                     params: { text: usermsg, lc: "bn" }
