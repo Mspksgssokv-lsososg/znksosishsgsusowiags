@@ -1,5 +1,5 @@
 const config = require("../UCA-Config/config");
-const noPrefix = require("../noprefix_settings.json");
+const noPrefix = require("../package.json");
 
 module.exports = async (bot, msg) => {
   if (!msg.text) return;
