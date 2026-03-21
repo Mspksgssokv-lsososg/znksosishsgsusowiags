@@ -12,7 +12,7 @@ const bold = "\x1b[1m";
 const reset = "\x1b[0m";
 
 banner();
-loader(bot);
+loader(bot); 
 
 bot.on('message', async (msg) => {
     const text = msg.text || "";
@@ -35,9 +35,7 @@ bot.on('message', async (msg) => {
             const botCmd = require("./UCA-BOT/Cmd/bot");
             let cleanText = text;
             triggers.forEach(t => {
-                if (lowerText.startsWith(t)) {
-                    cleanText = text.substring(t.length).trim();
-                }
+                if (lowerText.startsWith(t)) cleanText = text.substring(t.length).trim();
             });
             
             const args = cleanText ? cleanText.split(" ") : [];
@@ -48,16 +46,6 @@ bot.on('message', async (msg) => {
     }
 });
 
-bot.on('new_chat_members', async (msg) => {
-    try {        
-        const welcome = require("./UCA-BOT/Event/welcome");
-        if (welcome && welcome.run) {
-            await welcome.run(bot, msg);
-        }
-    } catch (err) {
-        console.error("Welcome System Error:", err.message);
-    }
-});
 
 console.log(`${yellow}====================================${reset}`);
 console.log(`${cyan}${bold}╦═╗╔═╗╦╔═ ╦╔╗   ╔╗ ╔═╗╔╦╗`);
