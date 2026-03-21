@@ -46,6 +46,17 @@ bot.on('message', async (msg) => {
     }
 });
 
+bot.on('new_chat_members', async (msg) => {
+    try {
+        const welcome = require("./UCA-BOT/Cmd/welcome");
+        if (welcome && welcome.run) {
+            await welcome.run(bot, msg);
+        }
+    } catch (err) {
+        console.error("Welcome System Error:", err.message);
+    }
+});
+
 console.log(`${yellow}====================================${reset}`);
 console.log(`${cyan}${bold}╦═╗╔═╗╦╔═ ╦╔╗   ╔╗ ╔═╗╔╦╗`);
 console.log(`╠╦╝╠═╣╠╩╗ ║╠╩╗  ╠╩╗║ ║ ║ `);
