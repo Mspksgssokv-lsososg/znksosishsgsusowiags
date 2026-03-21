@@ -20,17 +20,18 @@ module.exports = {
         return bot.sendMessage(chatId, `❌ Please provide a question!\nExample: ${config.prefix}ai hello`, { reply_to_message_id: messageId });
     }
 
+    // --- প্রথম মেসেজ যা ইউজার দেখবে ---
     const waiting = await bot.sendMessage(chatId, "🔍 AI is thinking...", { reply_to_message_id: messageId });
 
     try {
-      // New Working API Link (GPT-4)
+      // Working AI API (Popcat)
       const res = await axios.get(`https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(text)}&owner=Rakib&botname=UCA-Bot`);
       
-      // Popcat API returns response in 'response' field
       const responseText = res.data.response || "I'm sorry, I couldn't process that.";
 
       const finalMsg = `🤖 **AI Response:**\n━━━━━━━━━━━━━━━━━━\n${responseText}\n━━━━━━━━━━━━━━━━━━\n👤 **User:** ${msg.from.first_name}`;
 
+      // উত্তর পাওয়ার পর "AI is thinking..." মেসেজটি এডিট হয়ে যাবে
       await bot.editMessageText(finalMsg, {
         chat_id: chatId,
         message_id: waiting.message_id,
@@ -38,23 +39,12 @@ module.exports = {
       });
 
     } catch (err) {
-      // If error occurs, try a backup API
-      try {
-          const backupRes = await axios.get(`https://api.simsimi.vn/v1/simtalk`, {
-              params: { text: text, lc: "en" }
-          });
-          const backupText = backupRes.data.message;
-          
-          await bot.editMessageText(`🤖 **AI (Backup):**\n\n${backupText}`, {
-            chat_id: chatId,
-            message_id: waiting.message_id
-          });
-      } catch (backupErr) {
-          bot.editMessageText(`❌ All AI APIs are currently down. Please try again later.`, {
-            chat_id: chatId,
-            message_id: waiting.message_id
-          });
-      }
+      // এপিআই এরর হলে সেটিও এডিট করে জানাবে
+      await bot.editMessageText(`❌ **API Error:** Server is not responding. Please try again later.`, {
+        chat_id: chatId,
+        message_id: waiting.message_id,
+        parse_mode: "Markdown"
+      });
     }
   }
 };
