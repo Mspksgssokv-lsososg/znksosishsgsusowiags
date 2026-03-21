@@ -73,13 +73,13 @@ module.exports = {
             return bot.sendMessage(chatId, `🗑️ **Admin Removed!**\n━━━━━━━━━━━━━━━━━━\n👤 **Name:** ${name}\n🆔 **ID:** \`${targetId}\`\n━━━━━━━━━━━━━━━━━━`, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
 
         } else if (action === "list" || !action) {
-            let adminListMsg = "╭━━━━━━❰ 👑 **BOT ADMINS** ❱━━━━━━╮\n";
+            let adminListMsg = "╭━━━❰ 👑 **BOT ADMINS** ❱━━━╮\n";
             for (let i = 0; i < config.admins.length; i++) {
                 const id = config.admins[i];
                 const name = await getUserInfo(bot, chatId, id); 
                 adminListMsg += `│ ${i + 1}. ${name}\n│    └─ 🆔 \`${id}\` ${i === 0 ? "👑" : "🛠️"}\n`;
             }
-            adminListMsg += "╰━━━━━━━━━━━━━━━━━━━━━━━━━━━❍";
+            adminListMsg += "╰━━━━━━━━━━━━━━━━━━━━━━━❍";
             return bot.sendMessage(chatId, adminListMsg, { reply_to_message_id: messageId, parse_mode: 'Markdown' });
 
         } else {
