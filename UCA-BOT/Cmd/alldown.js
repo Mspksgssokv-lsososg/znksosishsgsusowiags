@@ -9,52 +9,41 @@ module.exports = {
   run: async (bot, msg, args) => {
     const chatId = msg.chat.id;
     const messageId = msg.message_id;
-    const text = msg.text || "";
+    const link = args[0];
 
-    // চেক করা হচ্ছে মেসেজটি কি কোনো লিঙ্ক কি না
-    const isLink = /https?:\/\/[^\s]+/.test(text);
-    if (!isLink) return;
+    if (!link) return;
 
-    // ওয়েটিং মেসেজ
-    const waitMsg = await bot.sendMessage(
-        chatId,
-        "⏳ **Downloading... Please Wait!**",
-        { reply_to_message_id: messageId, parse_mode: 'Markdown' }
-    );
+    const waitMsg = await bot.sendMessage(chatId, "⏳ **Downloading... Please Wait!**", { 
+        reply_to_message_id: messageId, 
+        parse_mode: 'Markdown' 
+    });
 
     try {
-      const res = await alldown(text);
-      if (!res || !res.data || !res.data.high) {
-        throw new Error("Video not found!");
-      }
-
+      const res = await alldown(link);
       const { high, title } = res.data;
-      const videoTitle = title || "No Title Found";
+      const videoTitle = title || "No Title";
 
-      // ভিডিও স্ট্রিম আনা
       const vidResponse = await axios.get(high, { responseType: 'stream' });
-      const videoStream = vidResponse.data;
 
-      // বাটন সেটআপ (আপনার টেলিগ্রাম লিংক এখানে দিন)
+      // আপনার টেলিগ্রাম বাটন এবং টাইটেল কপি বাটন
       const replyMarkup = {
         inline_keyboard: [
-          [{ text: '📥 Copy Title', copy_text: { text: videoTitle } }], // টাইটেল কপির জন্য
-          [{ text: '🔗 JOIN OWNER', url: 'https://t.me/UCA_RAKIB }] // আপনার টেলিগ্রাম লিংক
+          [{ text: '📥 Copy Title', callback_data: 'copy_title' }], // নোট: টেলিগ্রামে সরাসরি 'copy' বাটন কেবল বটের নিজস্ব টেক্সটে হয়, তাই আমরা ক্যাপশনে ক্লিক-টু-কপি দেব।
+          [{ text: '🔗 JOIN OWNER', url: 'https://t.me/your_channel_link' }] 
         ]
       };
 
-      // মেসেজ এডিট/ডিলিট করে ভিডিও পাঠানো
       await bot.deleteMessage(chatId, waitMsg.message_id);
 
-      await bot.sendVideo(chatId, videoStream, {
-        caption: `🎬 **Title:** \`${videoTitle}\`\n\n✅ *Auto Downloaded by UCA-Bot*`,
+      await bot.sendVideo(chatId, vidResponse.data, {
+        caption: `🎬 **Title:** \`${videoTitle}\`\n\n*(টাইটেলের ওপর ক্লিক করলে কপি হবে)*\n\n✅ **Downloaded by UCA-Bot**`,
         parse_mode: 'Markdown',
         reply_to_message_id: messageId,
         reply_markup: replyMarkup
       });
 
     } catch (error) {
-      await bot.editMessageText(`❌ **Failed to download!**\nError: ${error.message}`, {
+      await bot.editMessageText(`❌ **Error:** ${error.message}`, {
         chat_id: chatId,
         message_id: waitMsg.message_id
       });
