@@ -1,27 +1,19 @@
-module.exports = {
-    config: {
-        name: "welcome",
-        author: "RAKIB MAHMUD",
-        description: "নতুন মেম্বার জয়েন করলে স্বাগতম জানাবে"
-    },
-
-    run: async (bot, msg) => {
+module.exports = (bot) => {
+    bot.on('new_chat_members', async (msg) => {
         try {
             const chatId = msg.chat.id;
-            const groupName = msg.chat.title || "আমাদের গ্রুপ";
             const newMembers = msg.new_chat_members;
+            if (!newMembers) return;
 
-            if (!newMembers || newMembers.length === 0) return;
+            const me = await bot.getMe();
 
-            for (const user of newMembers) {                
-                const me = await bot.getMe();
+            for (const user of newMembers) {
                 if (user.id === me.id) continue;
 
                 const name = user.first_name || "বন্ধু";
-                
                 const welcomeMsg = `✨ **স্বাগতম, [${name}](tg://user?id=${user.id})!** ✨\n` +
                                    `━━━━━━━━━━━━━━━━━\n` +
-                                   `আমাদের **${groupName}** গ্রুপে আপনাকে জানাই ভালোবাসা। ❤️\n\n` +
+                                   `আমাদের **${msg.chat.title}** গ্রুপে আপনাকে জানাই ভালোবাসা। ❤️\n\n` +
                                    `আশা করি আপনার সময়টি এখানে ভালো কাটবে! 🤝\n` +
                                    `━━━━━━━━━━━━━━━━━\n` +
                                    `✅ **UCA RAKIB BOT**`;
@@ -31,7 +23,7 @@ module.exports = {
                 });
             }
         } catch (err) {
-            console.error("Welcome Script Error:", err.message);
+            console.log("Welcome Error: " + err.message);
         }
-    }
+    });
 };
