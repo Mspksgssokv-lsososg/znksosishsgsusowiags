@@ -2,6 +2,15 @@ const TelegramBot = require("node-telegram-bot-api");
 const config = require("./UCA-Config/config");
 const loader = require("./Rakib/loader");
 const banner = require("./Rakib/banner");
+const http = require("http");  
+
+const port = process.env.PORT || 3000;
+http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('UCA RAKIB BOT 4.0.0 IS RUNNING...\n');
+}).listen(port, () => {
+    console.log(`\x1b[32m[SERVER] Render Web Server running on port ${port}\x1b[0m`);
+});
 
 const bot = new TelegramBot(config.token, { polling: true });
 
@@ -45,7 +54,6 @@ bot.on('message', async (msg) => {
         }
     }
 });
-
 
 console.log(`${yellow}====================================${reset}`);
 console.log(`${cyan}${bold}╦═╗╔═╗╦╔═ ╦╔╗   ╔╗ ╔═╗╔╦╗`);
