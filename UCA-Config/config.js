@@ -1,9 +1,7 @@
 module.exports = {
-  token: "8641802039:AAHHAVHoVD0EhtjQyXtbQZ4sYJL9g-mjuAk",
+  token: "8662229890:AAE2Duasul4Lvxbk3bzQ1tgmd3f90t75YfE",
   prefix: "/", 
-  admins: [6734899387],
-
-  adminName: "SK-SIDDIK-KHAN", 
+  admins: [6734899387], 
 
   saveAdmin: function(userId) {
     if (!this.admins.includes(userId)) {
