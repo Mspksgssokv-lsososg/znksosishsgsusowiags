@@ -12,7 +12,6 @@ module.exports = (bot) => {
     const cmdPath = path.join(__dirname, "../UCA-BOT/Cmd");
     const cmdFiles = fs.readdirSync(cmdPath).filter(f => f.endsWith(".js"));
 
-    // ✅ Load Commands + onLoad
     for (const file of cmdFiles) {
         try {
             const cmd = require(`${cmdPath}/${file}`);
