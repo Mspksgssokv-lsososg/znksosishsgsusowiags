@@ -26,19 +26,28 @@ module.exports = (bot) => {
   }
  
   
-  bot.on("message", (msg) => {
-    if (!msg.text) return;
-    
-    const prefix = config.prefix;
-    
-    if (!msg.text.startsWith(prefix)) return; 
- 
-    const args = msg.text.slice(prefix.length).trim().split(/ +/);
-    const commandName = args.shift().toLowerCase();
-    const command = bot.commands.get(commandName);
-    
-    if (command) {
-      try {
+  bot.on("message", async (msg) => {
+        if (!msg.text) return;
+
+        const text = msg.text.trim();
+        const lowerText = text.toLowerCase();
+        const prefix = config.prefix;
+
+        const args = lowerText.startsWith(prefix)
+            ? lowerText.slice(prefix.length).trim().split(/ +/)
+            : lowerText.split(/ +/);
+
+        const commandName = args.shift();
+
+        const command = Array.from(bot.commands.values()).find(cmd => 
+            cmd.name === commandName || cmd.aliases?.includes(commandName)
+        );
+
+        if (!command) return;
+
+        if (command.prefix !== false && !lowerText.startsWith(prefix)) return;
+
+        try {
         command.run(bot, msg, args);
       } catch (err) {
         console.log(`${y}❌ Command Error (${commandName}): ${err.message}${r}`);
