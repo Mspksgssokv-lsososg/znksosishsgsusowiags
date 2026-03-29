@@ -11,60 +11,66 @@ module.exports = {
         const chatId = msg.chat.id;
         const message_id = msg.message_id;
 
-        const commandPath = path.join(__dirname, "../UCA-BOT/Cmd");
-        const commandFiles = fs.readdirSync(commandPath).filter(file => file.endsWith(".js"));
+        // ✅ FIXED PATH (no duplicate folder issue)
+        const commandPath = __dirname;
 
-        const config = require("../UCA.Config/config.js");
+        const commandFiles = fs.readdirSync(commandPath)
+            .filter(file => file.endsWith(".js") && file !== "help.js");
 
-        // prefix fallback
+        const config = require("../../UCA.Config/config.js");
+
         let prefix = "!";
-
         let categories = {};
         let totalCommands = 0;
 
+        // ================= LOAD COMMANDS =================
         for (const file of commandFiles) {
-            const command = require(path.join(commandPath, file));
+            try {
+                const command = require(path.join(commandPath, file));
 
-            if (!command) continue;
+                if (!command || !command.name) continue;
 
-            const category = command.category || command.commandCategory || "OTHER";
+                const category = command.category || command.commandCategory || "OTHER";
 
-            if (!categories[category]) categories[category] = [];
+                if (!categories[category]) categories[category] = [];
 
-            categories[category].push(command);
-            totalCommands++;
+                categories[category].push(command);
+                totalCommands++;
+
+            } catch (err) {
+                console.log("Error loading:", file, err.message);
+            }
         }
 
-        // ================= SEARCH =================
+        // ================= SEARCH / COMMAND INFO =================
         if (args[0]) {
 
+            // 🔍 SEARCH BY LETTER
             if (args[0] === "-s" && args[1]) {
-                const searchLetter = args[1].toLowerCase();
+                const letter = args[1].toLowerCase();
 
-                const matchingCommands = Object.values(categories)
+                const matches = Object.values(categories)
                     .flat()
-                    .filter(cmd => cmd.name && cmd.name.startsWith(searchLetter));
+                    .filter(cmd => cmd.name.toLowerCase().startsWith(letter));
 
-                if (matchingCommands.length === 0) {
-                    return bot.sendMessage(chatId, `❌ '${searchLetter}' দিয়ে কোনো command পাওয়া যায়নি।`);
+                if (!matches.length) {
+                    return bot.sendMessage(chatId, `❌ '${letter}' দিয়ে কোনো command পাওয়া যায়নি।`);
                 }
 
-                let searchMessage = `✨ Commands Starting With '${searchLetter.toUpperCase()}' ✨\n\n`;
-                matchingCommands.forEach(cmd => {
-                    searchMessage += `✧ ${cmd.name}\n`;
-                });
+                let text = `✨ Commands starting with '${letter.toUpperCase()}' ✨\n\n`;
+                matches.forEach(cmd => text += `✧ ${cmd.name}\n`);
 
-                return bot.sendMessage(chatId, searchMessage, { reply_to_message_id: message_id });
+                return bot.sendMessage(chatId, text, { reply_to_message_id: message_id });
             }
 
-            // ================= SINGLE COMMAND =================
-            const commandName = args[0].toLowerCase();
+            // 🔎 SINGLE COMMAND
+            const name = args[0].toLowerCase();
 
             const command = Object.values(categories)
                 .flat()
                 .find(cmd =>
-                    cmd.name === commandName ||
-                    (cmd.aliases && cmd.aliases.includes(commandName))
+                    cmd.name.toLowerCase() === name ||
+                    (cmd.aliases && cmd.aliases.includes(name))
                 );
 
             if (!command) {
@@ -91,7 +97,7 @@ module.exports = {
             }
 
             // full info
-            let commandInfo = `
+            let info = `
 ╭──✦ [ ${command.name.toUpperCase()} ]
 ├‣ 📜 Name: ${command.name}
 ├‣ 👤 Credits: ${command.credits || command.author || "Unknown"}
@@ -103,25 +109,25 @@ module.exports = {
 ├‣ ⚜️ Premium: ${command.premium ? "Yes" : "No"}
 ╰───────────────◊`;
 
-            return bot.sendMessage(chatId, commandInfo, { reply_to_message_id: message_id });
+            return bot.sendMessage(chatId, info, { reply_to_message_id: message_id });
         }
 
-        // ================= ALL COMMAND LIST =================
-        let helpMessage = `✨ Guide For Beginners ✨\n\n`;
+        // ================= FULL HELP LIST =================
+        let helpText = `✨ Guide For Beginners ✨\n\n`;
 
         for (const category in categories) {
-            helpMessage += `╭──── [ ${category.toUpperCase()} ]\n`;
-            helpMessage += `│ ${categories[category].map(cmd => "✧ " + cmd.name).join("\n│ ")}\n`;
-            helpMessage += `╰───────────────◊\n`;
+            helpText += `╭──── [ ${category.toUpperCase()} ]\n`;
+            helpText += `│ ${categories[category].map(cmd => "✧ " + cmd.name).join("\n│ ")}\n`;
+            helpText += `╰───────────────◊\n`;
         }
 
-        helpMessage += `
-╭─『 ${config.botName || "BOT"} 』
+        helpText += `
+╭─『 ${(config.botName || "BOT").toUpperCase()} 』
 ├‣ Total Commands: ${totalCommands}
 ├‣ Prefix: ${prefix}
 ├‣ Admin: ${config.adminName || "Unknown"}
 ╰───────────────◊`;
 
-        return bot.sendMessage(chatId, helpMessage, { reply_to_message_id: message_id });
+        return bot.sendMessage(chatId, helpText, { reply_to_message_id: message_id });
     }
 };
