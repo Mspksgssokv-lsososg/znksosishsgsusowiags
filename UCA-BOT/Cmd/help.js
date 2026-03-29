@@ -11,22 +11,35 @@ module.exports = {
         const chatId = msg.chat.id;
         const message_id = msg.message_id;
 
-        // ✅ FIXED PATH (no duplicate folder issue)
+        args = args || [];
+
         const commandPath = __dirname;
 
-        const commandFiles = fs.readdirSync(commandPath)
-            .filter(file => file.endsWith(".js") && file !== "help.js");
-
-        const config = require("../../UCA.Config/config.js");
-
-        let prefix = "!";
         let categories = {};
         let totalCommands = 0;
 
+        // ✅ SAFE CONFIG LOAD
+        let config = {};
+        try {
+            config = require("../../UCA.Config/config.js");
+        } catch (e) {
+            console.log("Config load failed!");
+        }
+
+        const prefix = config.prefix || "!";
+
         // ================= LOAD COMMANDS =================
+        const commandFiles = fs.readdirSync(commandPath)
+            .filter(file => file.endsWith(".js") && file !== "help.js");
+
         for (const file of commandFiles) {
             try {
-                const command = require(path.join(commandPath, file));
+                const filePath = path.join(commandPath, file);
+
+                // ✅ FIX CACHE
+                delete require.cache[require.resolve(filePath)];
+
+                const command = require(filePath);
 
                 if (!command || !command.name) continue;
 
@@ -42,7 +55,7 @@ module.exports = {
             }
         }
 
-        // ================= SEARCH / COMMAND INFO =================
+        // ================= SEARCH =================
         if (args[0]) {
 
             // 🔍 SEARCH BY LETTER
@@ -70,7 +83,7 @@ module.exports = {
                 .flat()
                 .find(cmd =>
                     cmd.name.toLowerCase() === name ||
-                    (cmd.aliases && cmd.aliases.includes(name))
+                    (Array.isArray(cmd.aliases) && cmd.aliases.includes(name))
                 );
 
             if (!command) {
@@ -91,7 +104,7 @@ module.exports = {
             // aliases
             if (args[1] === "-a") {
                 return bot.sendMessage(chatId,
-                    `🪶 Aliases: ${command.aliases ? command.aliases.join(", ") : "None"}`,
+                    `🪶 Aliases: ${Array.isArray(command.aliases) ? command.aliases.join(", ") : "None"}`,
                     { reply_to_message_id: message_id }
                 );
             }
@@ -102,7 +115,7 @@ module.exports = {
 ├‣ 📜 Name: ${command.name}
 ├‣ 👤 Credits: ${command.credits || command.author || "Unknown"}
 ├‣ 🔑 Permission: ${command.role === 0 ? "Everyone" : "Admin"}
-├‣ 🪶 Aliases: ${command.aliases ? command.aliases.join(", ") : "None"}
+├‣ 🪶 Aliases: ${Array.isArray(command.aliases) ? command.aliases.join(", ") : "None"}
 ├‣ 📜 Description: ${command.description || "No description"}
 ├‣ 📚 Guide: ${guide}
 ├‣ 🚩 Prefix: ${prefix}
@@ -112,7 +125,7 @@ module.exports = {
             return bot.sendMessage(chatId, info, { reply_to_message_id: message_id });
         }
 
-        // ================= FULL HELP LIST =================
+        // ================= FULL LIST =================
         let helpText = `✨ Guide For Beginners ✨\n\n`;
 
         for (const category in categories) {
