@@ -12,21 +12,26 @@ module.exports = {
     const chatId = msg.chat.id;
 
     try {
+      // folder ensure
       if (!fs.existsSync(cacheDir)) {
         fs.mkdirSync(cacheDir, { recursive: true });
       }
 
+      // write restart info
       fs.writeFileSync(restartFile, `${chatId} ${Date.now()}`);
 
       await bot.sendMessage(chatId, "🔄 | Restarting the bot...");
 
-      // ✅ NEW PROCESS START (IMPORTANT FIX)
-      spawn(process.argv[0], process.argv.slice(1), {
+      // start new process (clean way)
+      const child = spawn(process.argv[0], process.argv.slice(1), {
         cwd: process.cwd(),
         detached: true,
-        stdio: "inherit"
+        stdio: "ignore"
       });
 
+      child.unref();
+
+      // exit old process
       process.exit(0);
 
     } catch (err) {
@@ -37,15 +42,35 @@ module.exports = {
 
   onLoad: async (bot) => {
     try {
+      // file না থাকলে কিছুই করবো না
       if (!fs.existsSync(restartFile)) return;
 
-      const [chatId, oldTime] = fs.readFileSync(restartFile, "utf-8").split(" ");
+      const data = fs.readFileSync(restartFile, "utf-8").trim();
+
+      if (!data) return;
+
+      const [chatId, oldTime] = data.split(" ");
+
+      // invalid data check
+      if (!chatId || !oldTime) return;
 
       const time = ((Date.now() - Number(oldTime)) / 1000).toFixed(2);
 
-      await bot.sendMessage(chatId, `✅ | Bot restarted\n⏰ | Time: ${time}s`);
+      await bot.sendMessage(
+        chatId,
+        `✅ | Bot restarted\n⏰ | Time: ${time}s`
+      );
 
-      fs.unlinkSync(restartFile);
+      // SAFE DELETE (no crash)
+      try {
+        if (fs.existsSync(restartFile)) {
+          fs.unlinkSync(restartFile);
+        }
+      } catch (err) {
+        if (err.code !== "ENOENT") {
+          console.error("Delete error:", err);
+        }
+      }
 
     } catch (err) {
       console.error("onLoad error:", err);
