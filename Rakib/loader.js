@@ -52,7 +52,6 @@ module.exports = (bot) => {
       } catch (err) {
         console.log(`${y}❌ Command Error (${commandName}): ${err.message}${r}`);
       }
-    }
   });
  
   
