@@ -4,6 +4,7 @@ module.exports = {
     name: "uptime",
     aliases: ["up", "upt"], 
     credits: "SK-SIDDIK-KHAN",
+    prefix: false,
     description: "Get system and bot uptime information",
 
     run: async (bot, msg) => {
