@@ -11,17 +11,40 @@ module.exports = {
     const chatId = msg.chat.id;
 
     try {
+      const start = Date.now();
+
       if (!fs.existsSync(cacheDir)) {
         fs.mkdirSync(cacheDir, { recursive: true });
       }
 
-      fs.writeFileSync(restartFile, `${chatId} ${Date.now()}`);
+      fs.writeFileSync(restartFile, `${chatId} ${start}`);
 
-      await bot.sendMessage(chatId, "🔄 | Restarting the bot...");
+      // 🔄 message send & id store
+      const sentMsg = await bot.sendMessage(chatId, "🔄 | Restarting the bot...");
 
-      // ❗ FAKE RESTART (NO OFF)
       setTimeout(async () => {
-        await bot.sendMessage(chatId, "✅ | Bot restarted");
+        const time = ((Date.now() - start) / 1000).toFixed(2);
+
+        // ✅ send final message
+        await bot.sendMessage(
+          chatId,
+          `✅ | Bot restarted\n⏰ | Time: ${time}s`
+        );
+
+        // ❌ delete previous message
+        try {
+          await bot.deleteMessage(chatId, sentMsg.message_id);
+        } catch (err) {
+          console.error("Delete failed:", err.message);
+        }
+
+        // safe delete file
+        try {
+          if (fs.existsSync(restartFile)) {
+            fs.unlinkSync(restartFile);
+          }
+        } catch {}
+
       }, 1500);
 
     } catch (err) {
@@ -30,26 +53,7 @@ module.exports = {
     }
   },
 
-  onLoad: async (bot) => {
-    try {
-      if (!fs.existsSync(restartFile)) return;
-
-      const [chatId, oldTime] = fs.readFileSync(restartFile, "utf-8").split(" ");
-
-      const time = ((Date.now() - Number(oldTime)) / 1000).toFixed(2);
-
-      await bot.sendMessage(
-        chatId,
-        `✅ | Bot restarted\n⏰ | Time: ${time}s`
-      );
-
-      // safe delete
-      try {
-        fs.unlinkSync(restartFile);
-      } catch {}
-
-    } catch (err) {
-      console.error("onLoad error:", err);
-    }
+  onLoad: async () => {
+    return;
   }
 };
