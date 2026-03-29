@@ -1,62 +1,61 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const cacheDir = path.join(__dirname, 'Siddik');
-const restartTxt = path.join(cacheDir, 'restart.txt');
+const cacheDir = path.join(__dirname, "Siddik");
+const restartFile = path.join(cacheDir, "restart.txt");
 
 module.exports = {
   name: "restart",
   credits: "SK-SIDDIK-KHAN",
   description: "Bot restart করার জন্য",
 
-  // Run when command is used
-  run: async (bot, msg, args) => {
+  // 🔄 Command run হলে
+  run: async (bot, msg) => {
     const chatId = msg.chat.id;
 
     try {
-      // Ensure folder exists
+      // folder না থাকলে তৈরি
       if (!fs.existsSync(cacheDir)) {
         fs.mkdirSync(cacheDir, { recursive: true });
       }
 
-      // Save restart info
-      fs.writeFileSync(restartTxt, `${chatId} ${Date.now()}`);
+      // restart info save
+      fs.writeFileSync(restartFile, `${chatId} ${Date.now()}`);
 
+      // restart message
       await bot.sendMessage(chatId, "🔄 | Restarting the bot...");
-      
-      process.exit(0); // Restart trigger
-    } catch (error) {
-      console.error("Restart command error:", error);
-      bot.sendMessage(chatId, "❌ | Error occurred while restarting");
+
+      // bot বন্ধ (PM2 আবার চালু করবে)
+      process.exit(0);
+
+    } catch (err) {
+      console.error("Restart error:", err);
+      bot.sendMessage(chatId, "❌ | Restart failed!");
     }
   },
 
-  // Run when bot starts
+  // ✅ Bot start হলে auto run
   onLoad: async (bot) => {
     try {
-      if (!fs.existsSync(cacheDir)) {
-        fs.mkdirSync(cacheDir, { recursive: true });
+      if (!fs.existsSync(restartFile)) return;
+
+      const data = fs.readFileSync(restartFile, "utf-8").split(" ");
+      const chatId = data[0];
+      const oldTime = Number(data[1]);
+
+      if (chatId && oldTime) {
+        const time = ((Date.now() - oldTime) / 1000).toFixed(2);
+
+        await bot.sendMessage(
+          chatId,
+          `✅ | Bot restarted\n⏰ | Time: ${time}s`
+        );
       }
 
-      if (fs.existsSync(restartTxt)) {
-        const content = fs.readFileSync(restartTxt, "utf-8").trim().split(" ");
-        
-        const chatId = content[0];
-        const oldtime = Number(content[1]);
+      fs.unlinkSync(restartFile);
 
-        if (chatId && oldtime) {
-          const elapsed = ((Date.now() - oldtime) / 1000).toFixed(3);
-          
-          await bot.sendMessage(
-            chatId,
-            `✅ | Bot restarted\n⏰ | Time: ${elapsed}s`
-          );
-        }
-
-        fs.unlinkSync(restartTxt);
-      }
     } catch (err) {
-      console.error("Error in restart onLoad:", err);
+      console.error("onLoad restart error:", err);
     }
   }
 };
