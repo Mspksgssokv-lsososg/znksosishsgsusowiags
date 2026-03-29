@@ -2,11 +2,11 @@ module.exports = {
     name: "", // এখানে নাম খালি রাখা হয়েছে যাতে শুধু প্রিফিক্সে কাজ করে
     credits: "RAKIB MAHMUD",
     description: "Random Islamic Caption and Photo on Prefix",
-
+ 
     run: async (bot, msg) => {
         const chatId = msg.chat.id;
         const messageId = msg.message_id;
-
+ 
         try {
             const captions = [
                 "ღ••\n– কোনো নেতার পিছনে নয়.!!🤸‍♂️\n– মসজিদের ইমামের পিছনে দাড়াও জীবন বদলে যাবে ইনশাআল্লাহ.!!🖤🌻\n۵",
@@ -26,7 +26,7 @@ module.exports = {
                 "_বুকে হাজারো কষ্ট নিয়ে\n                  আলহামদুলিল্লাহ বলাটা••!☺️\n_আল্লাহর প্রতি অগাধ বিশ্বাসের নমুনা❤️🥀",
                 "_আল্লাহর ভালোবাসা পেতে চাও•••!🤗\n\n_তবে রাসুল (সা:)কে অনুসরণ করো••!🥰   "
             ];
-
+ 
             const links = [
                 "https://i.postimg.cc/7LdGnyjQ/images-31.jpg",
                 "https://i.postimg.cc/65c81ZDZ/images-30.jpg",
@@ -47,17 +47,18 @@ module.exports = {
                 "https://i.postimg.cc/LsMSj9Ts/images-1-20.jpg",
                 "https://i.postimg.cc/KzNXyttX/images-1-13.jpg"
             ];
-
+ 
             const randomCaption = captions[Math.floor(Math.random() * captions.length)];
             const randomImageLink = links[Math.floor(Math.random() * links.length)];
-
+ 
             await bot.sendPhoto(chatId, randomImageLink, {
                 caption: randomCaption,
                 reply_to_message_id: messageId
             });
-
+ 
         } catch (error) {
             console.error("Prefix Post Error:", error.message);
         }
     }
 };
+ 
