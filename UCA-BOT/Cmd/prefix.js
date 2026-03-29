@@ -1,7 +1,7 @@
 module.exports = {
     name: "prefix",
     aliases: ["pre"],
-    prefix false,
+    prefix: false,
     credits: "SK-SIDDIK-KHAN",
     description: "Bot prefix দেখার জন্য",
 
